@@ -85,7 +85,7 @@ test('archive/delete guard requires version, correct project key and explicit co
  try{
   const bad=await app.inject({method:'POST',url:'/api/projects/'+project+'/lifecycle/delete',
    headers,payload:{version:2,key:'ABC-123',confirmed:false}});
-  assert.equal(bad.statusCode,400);assert.deepEqual(f.calls,[]);
+  assert.equal(bad.statusCode,400);assert.equal(f.calls.length,0);
   const good=await app.inject({method:'POST',url:'/api/projects/'+project+'/lifecycle/archive',
    headers,payload:{version:2,key:'ABC-123',confirmed:true}});
   assert.equal(good.statusCode,200);
