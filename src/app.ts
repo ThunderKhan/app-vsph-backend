@@ -7,8 +7,11 @@ import { installInvitationRoutes } from './modules/invitations/routes.js';
 import { supabaseInvitationStore } from './modules/invitations/supabase-store.js';
 import type { InvitationStore } from './modules/invitations/store.js';
 import { supabaseAuthStore } from './modules/auth/supabase-store.js';
+import { installTemporaryCredentials } from './modules/credentials/routes.js';
+import { supabaseCredentialStore } from './modules/credentials/supabase-store.js';
+import type { CredentialStore } from './modules/credentials/store.js';
 
-export type Runtime = { checkDatabase?: () => Promise<boolean>; auth?: AuthDependencies; invitations?: InvitationStore };
+export type Runtime = { checkDatabase?: () => Promise<boolean>; auth?: AuthDependencies; invitations?: InvitationStore; credentials?: CredentialStore };
 /** Builds without external side effects. Provider connections are opt-in and never fabricated. */
 export function buildApp(env: Env, runtime: Runtime = {}): FastifyInstance {
   const app = Fastify({
@@ -50,6 +53,7 @@ export function buildApp(env: Env, runtime: Runtime = {}): FastifyInstance {
   installAuthRoutes(app,env,runtime.auth);
   installInvitationRoutes(app,runtime.auth?.store??supabaseAuthStore(env),
     runtime.invitations??supabaseInvitationStore(env));
+  installTemporaryCredentials(app,runtime.credentials??supabaseCredentialStore(env),env.NODE_ENV==='production');
   app.setNotFoundHandler((_request, reply) => reply.code(404).send({ message: 'Not found.', code: 'NOT_FOUND' }));
   return app;
 }
