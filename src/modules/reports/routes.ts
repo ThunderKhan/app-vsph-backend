@@ -7,7 +7,6 @@ import {resolvePortalSession,PortalSessionError} from '../auth/portal-session.js
 import type {AuthStore} from '../auth/store.js';
 import type {ProjectReportStore} from './store.js';
 import {projectCsv} from './csv.js';
-const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const fullUuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const iso=z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(s=>
  !Number.isNaN(Date.parse(s))&&new Date(s).toISOString().slice(0,10)===s);
