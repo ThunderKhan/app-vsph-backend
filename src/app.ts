@@ -12,6 +12,9 @@ import { installReadRoutes } from './modules/read/routes.js';
 import { installFinanceCommands } from './modules/finance/routes.js';
 import { installProfileRoutes } from './modules/profile/routes.js';
 import { installPublicEmployeeEnrollment } from './modules/employee-enrollment/routes.js';
+import { installManagedEmployeeEnrollment } from './modules/employee-enrollment/manager-routes.js';
+import { supabaseManagerEnrollmentStore } from './modules/employee-enrollment/supabase-manager-store.js';
+import type { ManagerEnrollmentStore } from './modules/employee-enrollment/manager-store.js';
 import { supabaseEnrollmentStore } from './modules/employee-enrollment/supabase-store.js';
 import type { EnrollmentStore } from './modules/employee-enrollment/store.js';
 import { supabaseProfileStore } from './modules/profile/supabase-store.js';
@@ -23,7 +26,7 @@ import type { PortalReadStore } from './modules/read/store.js';
 import { supabaseCredentialStore } from './modules/credentials/supabase-store.js';
 import type { CredentialStore } from './modules/credentials/store.js';
 
-export type Runtime = { checkDatabase?: () => Promise<boolean>; auth?: AuthDependencies; invitations?: InvitationStore; credentials?: CredentialStore; reads?: PortalReadStore; finance?: FinanceCommandStore; profile?: AccountProfileStore; employeeEnrollment?: EnrollmentStore };
+export type Runtime = { checkDatabase?: () => Promise<boolean>; auth?: AuthDependencies; invitations?: InvitationStore; credentials?: CredentialStore; reads?: PortalReadStore; finance?: FinanceCommandStore; profile?: AccountProfileStore; employeeEnrollment?: EnrollmentStore; managedEnrollment?: ManagerEnrollmentStore };
 /** Builds without external side effects. Provider connections are opt-in and never fabricated. */
 export function buildApp(env: Env, runtime: Runtime = {}): FastifyInstance {
   const app = Fastify({
@@ -70,6 +73,8 @@ export function buildApp(env: Env, runtime: Runtime = {}): FastifyInstance {
   installFinanceCommands(app,runtime.auth?.store??supabaseAuthStore(env),runtime.finance??supabaseFinanceStore(env));
   installProfileRoutes(app,runtime.auth?.store??supabaseAuthStore(env),runtime.profile??supabaseProfileStore(env));
   installPublicEmployeeEnrollment(app,runtime.employeeEnrollment??supabaseEnrollmentStore(env));
+  installManagedEmployeeEnrollment(app,env,runtime.auth?.store??supabaseAuthStore(env),
+    runtime.managedEnrollment??supabaseManagerEnrollmentStore(env));
   app.setNotFoundHandler((_request, reply) => reply.code(404).send({ message: 'Not found.', code: 'NOT_FOUND' }));
   return app;
 }
