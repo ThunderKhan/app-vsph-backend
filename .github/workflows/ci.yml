@@ -1,0 +1,37 @@
+name: backend-migration-checks
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  node24:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Clean install
+        run: npm ci
+      - name: Strict TypeScript
+        run: npm run typecheck
+      - name: ESLint
+        run: npm run lint
+      - name: Unit and HTTP isolation tests
+        run: npm test
+      - name: Build
+        run: npm run build
+  container-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate Compose syntax
+        run: docker compose config --quiet
+      - name: Build image without connecting to any provider
+        run: docker build --tag vsph-backend-migration:ci .
