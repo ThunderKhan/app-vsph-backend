@@ -13,6 +13,7 @@
 - `POST /api/auth/login`, `GET /api/auth/me`, `POST /api/auth/logout`, `POST /api/auth/app-login`, `POST /api/auth/app-logout`.
 - `GET /api/apps`, `GET /api/apps/:app/contexts`, `GET /api/apps/:app/context`, `GET /api/apps/:app/records` with static CRM/Music adapters and scoped reads.
 - `GET /api/account/sessions`, `POST /api/account/sessions/revoke-others`, `POST /api/account/sessions/:id/revoke`, using the original service-only `session_command` RPC.
+- Read-only projects (list/detail/manager overview), filtered search, HRMS access and finance dashboard/overview via original privileged RPCs. Owner role is checked before finance; actor and current session hash are never browser supplied. Native SQL permission tests still required.
 - Customer invitation inspection/acceptance uses hashed capability, SQL `provisioning_command` inspect/reserve/finish/failed transitions and only the reserved provider identity. **SQL/provider acceptance unverified.**
 - Employee temporary sign-in uses verified Supabase user enrollment metadata and a successful legacy `internal_employee_credentials.login` before issuing a 10-minute setup cookie (no portal session).
 - `GET /api/employee-credentials/status` and `POST /api/employee-credentials/replace` now use the original SQL reserve/reject/finish/failed lifecycle and verify the reserved provider identity. The real provider+database workflow remains unverified.
