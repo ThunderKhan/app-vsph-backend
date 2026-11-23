@@ -16,6 +16,8 @@
 - Account profile GET/PATCH now use the original `account_profile` RPC with trusted actor/current session, strict version/time-zone validation and negative authorization tests.
 - Finance invoice issuance, receipt recording, receipt reversal and invoice void now dispatch to the original atomic `finance_command` SQL RPC with strict integer-paise validation, idempotency keys and owner prechecks. Tests use isolated stores; native financial integrity is not yet proven.
 - Read-only projects (list/detail/manager overview), filtered search, HRMS access and finance dashboard/overview via original privileged RPCs. Owner role is checked before finance; actor and current session hash are never browser supplied. Native SQL permission tests still required.
+- Versioned project creation/update, tasks, milestones, comments and deliverables now route into the original `project_command` SQL transaction. Manager appointment uses the reviewed `project_creation_command`; a missing schema blocks nonempty manager assignment rather than silently dropping it. Negative tests cover forged actor, invalid objects, tenant-denied SQL, stale versions and insecure URLs.
+- Project workforce directory, role assignment/revoke, member governance and guarded archive/delete now use the original `project_workforce_command`, `project_command` and `project_lifecycle_command`. SQL retains ownership, protected-role and dependency audit invariants. **Native SQL tests remain required.**
 - Customer invitation inspection/acceptance uses hashed capability, SQL `provisioning_command` inspect/reserve/finish/failed transitions and only the reserved provider identity. **SQL/provider acceptance unverified.**
 - Employee enrollment inspection/acceptance now uses one-use SQL `internal_employee_enrollment` proof, durable reserve/finish/reject/failed transitions, and strict provider identity matching. Managed review/start/renew/ready/cancel uses session-bound SQL authority, current roster versions, one-use capabilities and UUID idempotency. Manual delivery only; email is explicitly unavailable until an approved adapter is configured. Native SQL/provider acceptance is still required.
 - Employee temporary sign-in uses verified Supabase user enrollment metadata and a successful legacy `internal_employee_credentials.login` before issuing a 10-minute setup cookie (no portal session).
@@ -42,8 +44,8 @@
 ## Next prioritized slices
 
 1. Finish manager-initiated temporary credential issuance and verify employee/customer one-use state transitions in disposable native PostgreSQL/Supabase.
-2. Organizations, customers, HRMS and projects via the retained privileged SQL commands; add current-role/tenant denial tests.
-3. Finance unchanged integer-paise RPC contracts and transactional correction/audit flows.
+2. Complete project workspace, custom applications, engineering delivery, organizations, customers and HRMS through their existing privileged SQL commands; add native tenant/role-negative tests.
+3. Verify finance integer-paise transactional integrity and correction/audit flows against the disposable SQL migration history, plus add journal/owner retrieval.
 4. GitHub delivery, Music/Outreach, workers with explicit provider gates.
 5. Verify exact frontend API contract matrix and integration acceptance before enabling production traffic.
 
