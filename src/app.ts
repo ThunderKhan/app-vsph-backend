@@ -15,6 +15,9 @@ import { installPublicEmployeeEnrollment } from './modules/employee-enrollment/r
 import { installManagedEmployeeEnrollment } from './modules/employee-enrollment/manager-routes.js';
 import { installProjectWriteRoutes } from './modules/project-write/routes.js';
 import { installProjectGovernance } from './modules/project-governance/routes.js';
+import { installProjectWorkspace } from './modules/project-workspace/routes.js';
+import { supabaseProjectWorkspaceStore } from './modules/project-workspace/supabase-store.js';
+import type { ProjectWorkspaceStore } from './modules/project-workspace/store.js';
 import { supabaseProjectGovernanceStore } from './modules/project-governance/supabase-store.js';
 import type { ProjectGovernanceStore } from './modules/project-governance/store.js';
 import { supabaseProjectWriteStore } from './modules/project-write/supabase-store.js';
@@ -32,7 +35,7 @@ import type { PortalReadStore } from './modules/read/store.js';
 import { supabaseCredentialStore } from './modules/credentials/supabase-store.js';
 import type { CredentialStore } from './modules/credentials/store.js';
 
-export type Runtime = { checkDatabase?: () => Promise<boolean>; auth?: AuthDependencies; invitations?: InvitationStore; credentials?: CredentialStore; reads?: PortalReadStore; finance?: FinanceCommandStore; profile?: AccountProfileStore; employeeEnrollment?: EnrollmentStore; managedEnrollment?: ManagerEnrollmentStore; projectWrites?: ProjectWriteStore; projectGovernance?: ProjectGovernanceStore };
+export type Runtime = { checkDatabase?: () => Promise<boolean>; auth?: AuthDependencies; invitations?: InvitationStore; credentials?: CredentialStore; reads?: PortalReadStore; finance?: FinanceCommandStore; profile?: AccountProfileStore; employeeEnrollment?: EnrollmentStore; managedEnrollment?: ManagerEnrollmentStore; projectWrites?: ProjectWriteStore; projectGovernance?: ProjectGovernanceStore; projectWorkspace?: ProjectWorkspaceStore };
 /** Builds without external side effects. Provider connections are opt-in and never fabricated. */
 export function buildApp(env: Env, runtime: Runtime = {}): FastifyInstance {
   const app = Fastify({
@@ -85,6 +88,8 @@ export function buildApp(env: Env, runtime: Runtime = {}): FastifyInstance {
     runtime.projectWrites??supabaseProjectWriteStore(env));
   installProjectGovernance(app,runtime.auth?.store??supabaseAuthStore(env),
     runtime.projectGovernance??supabaseProjectGovernanceStore(env));
+  installProjectWorkspace(app,runtime.auth?.store??supabaseAuthStore(env),
+    runtime.projectWorkspace??supabaseProjectWorkspaceStore(env));
   app.setNotFoundHandler((_request, reply) => reply.code(404).send({ message: 'Not found.', code: 'NOT_FOUND' }));
   return app;
 }
