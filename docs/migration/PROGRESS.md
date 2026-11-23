@@ -17,9 +17,10 @@
 - Finance invoice issuance, receipt recording, receipt reversal and invoice void now dispatch to the original atomic `finance_command` SQL RPC with strict integer-paise validation, idempotency keys and owner prechecks. Tests use isolated stores; native financial integrity is not yet proven.
 - Read-only projects (list/detail/manager overview), filtered search, HRMS access and finance dashboard/overview via original privileged RPCs. Owner role is checked before finance; actor and current session hash are never browser supplied. Native SQL permission tests still required.
 - Customer invitation inspection/acceptance uses hashed capability, SQL `provisioning_command` inspect/reserve/finish/failed transitions and only the reserved provider identity. **SQL/provider acceptance unverified.**
+- Employee enrollment inspection/acceptance now uses one-use SQL `internal_employee_enrollment` proof, durable reserve/finish/reject/failed transitions, and strict provider identity matching. Managed review/start/renew/ready/cancel uses session-bound SQL authority, current roster versions, one-use capabilities and UUID idempotency. Manual delivery only; email is explicitly unavailable until an approved adapter is configured. Native SQL/provider acceptance is still required.
 - Employee temporary sign-in uses verified Supabase user enrollment metadata and a successful legacy `internal_employee_credentials.login` before issuing a 10-minute setup cookie (no portal session).
 - `GET /api/employee-credentials/status` and `POST /api/employee-credentials/replace` now use the original SQL reserve/reject/finish/failed lifecycle and verify the reserved provider identity. The real provider+database workflow remains unverified.
-- Unit and Fastify inject test files for absent sessions, unauthorized tenants, MFA enforcement, cookie parsing, session revocation and origin protection. **Execution not yet verified.**
+- Unit and Fastify inject tests cover sessions, role/tenant enforcement, MFA, cookie parsing, revocation, finance, private invitations and employee enrollment. Check the latest GitHub Actions run for actual execution results; mocks are not live-provider proof.
 - Dockerfile, Compose isolated ephemeral PostgreSQL profile. A dependency lockfile was derived from v3; Node 24 `npm ci` successfully executed in GitHub Actions on earlier commit `71e73cdd`. Latest head must be revalidated.
 
 ## Known compatibility differences and implementation warnings
@@ -34,13 +35,13 @@
 
 - No approved isolated Supabase and native PostgreSQL migration-history verification; no proof that live deployed tables/RPC privileges match the checked-in manifest.
 - No live Supabase MFA credential tests, temporary password/invitation provider tests, real role/tenant journeys, secure external integration receiver.
-- Runtime here provides Node 22 and no GitHub network or Docker; GitHub Actions validates Node 24 `npm ci`, typecheck, lint, unit tests, build, and Docker without local credentials. An earlier commit (`de89aebe`) passed both CI jobs; latest head requires revalidation. Native DB and live provider acceptance are still unavailable.
+- Runtime here provides Node 22 and no GitHub network or Docker; GitHub Actions validates Node 24 `npm ci`, typecheck, lint, unit tests, build, and Docker without local credentials. Commit `311404b8` passed both CI jobs; enrollment manager commits require latest-head revalidation. Native DB and live provider acceptance are still unavailable.
 - No cloud configuration, DNS, production schema, tokens or other live secrets were touched.
 - `GET /api/health` reports database connectivity only, never production rollout readiness.
 
 ## Next prioritized slices
 
-1. Finish employee credential issuance and employee-enrollment proof/acceptance; verify one-use flows using native disposable PostgreSQL.
+1. Finish manager-initiated temporary credential issuance and verify employee/customer one-use state transitions in disposable native PostgreSQL/Supabase.
 2. Organizations, customers, HRMS and projects via the retained privileged SQL commands; add current-role/tenant denial tests.
 3. Finance unchanged integer-paise RPC contracts and transactional correction/audit flows.
 4. GitHub delivery, Music/Outreach, workers with explicit provider gates.
