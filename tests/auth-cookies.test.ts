@@ -6,8 +6,8 @@ const request=(header:string)=>({headers:{cookie:header}} as FastifyRequest);
 test('session cookies are allowlisted, opaque and duplicate-resistant',()=>{
   assert.deepEqual({...sessionCookies(request('vsph.portal.sid='+'a'.repeat(43)+'; attack=anything'))},
     {'vsph.portal.sid':'a'.repeat(43)});
-  assert.deepEqual({...sessionCookies(request('vsph.portal.sid='+'a'.repeat(43)+'; vsph.portal.sid='+'b'.repeat(43)))},{});
-  assert.deepEqual({...sessionCookies(request('vsph.portal.sid=invalid'))},{});
+  assert.throws(()=>sessionCookies(request('vsph.portal.sid='+'a'.repeat(43)+'; vsph.portal.sid='+'b'.repeat(43))));
+  assert.throws(()=>sessionCookies(request('vsph.portal.sid=invalid')));
 });
 test('signed cookies preserve legacy prefix and security flags',()=>{
   const header=sessionSetCookie('vsph.portal.sid','A'.repeat(43),true,14400);
