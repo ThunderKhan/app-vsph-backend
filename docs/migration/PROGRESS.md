@@ -20,6 +20,7 @@
 - Project workforce directory, role assignment/revoke, member governance and guarded archive/delete now use the original `project_workforce_command`, `project_command` and `project_lifecycle_command`. SQL retains ownership, protected-role and dependency audit invariants. **Native SQL tests remain required.**
 - Project workspace GET and action POST now use `project_workspace_command` for versioned milestone checklist, risks, resources and weekly updates. Inputs preserve frozen action names and strict UUID, HTTPS URL, enum, and version validation. Mock tests include origin, actor and SQL denial cases.
 - Project custom-app GET/POST/PATCH now use the retained `project_custom_application_command` with actor/project boundary, positive version, strict allowed status and safe HTTPS URL policy. Negative tests prevent authority injection, cross-tenant SQL access and insecure links. Native SQL acceptance remains pending.
+- Notifications: inbox dispatch/list, retry, own preferences GET/save and bounded receipt mark-read use the original `notification_command` SQL RPC. Tests verify current portal authority, SQL denial, strict preference booleans and dispatch-before-inbox ordering. Actual notification jobs and delivery remain unverified.
 - Customer invitation inspection/acceptance uses hashed capability, SQL `provisioning_command` inspect/reserve/finish/failed transitions and only the reserved provider identity. **SQL/provider acceptance unverified.**
 - Employee enrollment inspection/acceptance now uses one-use SQL `internal_employee_enrollment` proof, durable reserve/finish/reject/failed transitions, and strict provider identity matching. Managed review/start/renew/ready/cancel uses session-bound SQL authority, current roster versions, one-use capabilities and UUID idempotency. Manual delivery only; email is explicitly unavailable until an approved adapter is configured. Native SQL/provider acceptance is still required.
 - Employee temporary sign-in uses verified Supabase user enrollment metadata and a successful legacy `internal_employee_credentials.login` before issuing a 10-minute setup cookie (no portal session).
@@ -39,7 +40,7 @@
 
 - No approved isolated Supabase and native PostgreSQL migration-history verification; no proof that live deployed tables/RPC privileges match the checked-in manifest.
 - No live Supabase MFA credential tests, temporary password/invitation provider tests, real role/tenant journeys, secure external integration receiver.
-- Runtime here provides Node 22 and no GitHub network or Docker; GitHub Actions validates Node 24 `npm ci`, typecheck, lint, unit tests, build, and Docker without local credentials. Commit `311404b8` passed both CI jobs; enrollment manager commits require latest-head revalidation. Native DB and live provider acceptance are still unavailable.
+- Runtime here provides Node 22 and no GitHub network or Docker; GitHub Actions validates Node 24 `npm ci`, typecheck, lint, unit tests, build, and Docker without local credentials. GitHub Actions passed at checkpoint `260378f6` (Node 24 npm ci, TypeScript, lint, isolated tests, build and Docker/Compose); newer notification commits require latest-head revalidation. Native DB and live provider acceptance are still unavailable.
 - No cloud configuration, DNS, production schema, tokens or other live secrets were touched.
 - `GET /api/health` reports database connectivity only, never production rollout readiness.
 
@@ -48,7 +49,7 @@
 1. Finish manager-initiated temporary credential issuance and verify employee/customer one-use state transitions in disposable native PostgreSQL/Supabase.
 2. Continue engineering delivery, organizations, customers and HRMS using existing privileged SQL commands; verify all source-wired project routines in disposable PostgreSQL.
 3. Verify finance integer-paise transactional integrity and correction/audit flows against the disposable SQL migration history, plus add journal/owner retrieval.
-4. GitHub delivery, Music/Outreach, workers with explicit provider gates.
+4. Add scoped project reports/CSV and owner journal; continue GitHub delivery, Music/Outreach and background workers with explicit provider gates.
 5. Verify exact frontend API contract matrix and integration acceptance before enabling production traffic.
 
 ## Gate checklist
