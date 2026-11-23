@@ -2,7 +2,7 @@ import {randomBytes} from 'node:crypto';
 import type {Env} from '../../config.js';
 import {serviceDatabase} from '../../repositories/supabase.js';
 import {RpcError} from '../../repositories/rpc-errors.js';
-import type {ManagerEnrollmentRecord,ManagerEnrollmentStore} from './manager-store.js';
+import type {ManagerEnrollmentStore} from './manager-store.js';
 
 async function bounded<T>(operation:()=>Promise<T>):Promise<T>{
  let timeout:ReturnType<typeof setTimeout>|undefined;
@@ -27,7 +27,7 @@ export function supabaseManagerEnrollmentStore(env:Env):ManagerEnrollmentStore {
    async provision(record){
      await bounded(async()=>{
        let response=await db().auth.admin.getUserById(record.authUserId);
-       if(response.error?.status===404||!response.data?.user&&!response.error) {
+       if(response.error?.status===404) {
          response=await db().auth.admin.createUser({
            id:record.authUserId,email:record.email,
            password:randomBytes(48).toString('base64url'),
