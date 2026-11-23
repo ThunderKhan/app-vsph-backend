@@ -23,6 +23,7 @@ function state() {
     appByCode:async code=>code==='CRM'?application:null,
     contexts:async()=>[{id:org,name:'Org A',status:'active',role:'manager'}],
     listedApps:async()=>[application],
+    listRecords:async()=>[],
     createAppSession:async row=>{apps.set(row.token_hash,row);},
     appSession:async hash=>apps.get(hash)??null,
     revokeAppSession:async hash=>{apps.delete(hash);},

@@ -32,7 +32,7 @@ export function supabaseAuthStore(env: Env): AuthStore {
     async temporaryLogout(hash) {
       const result=await db().rpc('internal_employee_credentials',{p_actor:null,p_action:'logout',
         p_id:null,p_data:{setupHash:hash}});
-      if (result.error && !['42501','40001','PGRST202','42883'].includes(result.error.code))
+      if (result.error && !['42501'].includes(result.error.code))
         throw new Error('Temporary session revocation failed');
     },
     async appByCode(code) {
@@ -75,6 +75,12 @@ export function supabaseAuthStore(env: Env): AuthStore {
       return checked(await db().from('applications')
         .select('id,code,name,login_path,status,visibility').eq('status','active')
         .eq('visibility','listed').order('name')) as Application[];
+    },
+    async listRecords(table,organizationId) {
+      // Table selection is a compile-time allowlist, never an arbitrary path or query.
+      if(!['crm_contacts','music_requests'].includes(table))throw new Error('Unsupported product adapter');
+      return checked(await db().from(table).select('*').eq('organization_id',organizationId)
+        .order('created_at',{ascending:false}).limit(100)) as Record<string,unknown>[];
     },
     async createAppSession(row) {
       checked(await db().from('app_sessions').insert(row));

@@ -11,6 +11,7 @@ import { PORTAL_COOKIE, EMPLOYEE_SETUP_COOKIE, SESSION_HOURS, hashSessionToken,
 import { resolvePortalSession, type ResolvedPortalSession } from './portal-session.js';
 import type { AuthStore, Application, ProductContext } from './store.js';
 import { supabaseAuthStore } from './supabase-store.js';
+import { adapter, canCreateRecord, diagnostics } from '../products/adapters.js';
 
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const code = /^[A-Z][A-Z0-9_]{1,39}$/;
@@ -168,8 +169,16 @@ export function installAuthRoutes(app:FastifyInstance, env:Env,deps:AuthDependen
   });
   app.get<{Params:{app:string}}>('/api/apps/:app/context',async(request)=>{
     const {principal,application,organization}=await requireProduct(request,request.params.app.toUpperCase());
-    // Capabilities and integration diagnostics will be completed with product adapters.
-    return {application,organization,role:organization.role,capabilities:{createRecords:false},
-      integration:{configured:false},user:{name:principal.user.full_name,email:principal.user.email}};
+    return {application,organization,role:organization.role,
+      capabilities:{createRecords:canCreateRecord(application.code,organization.role)},
+      integration:diagnostics(application.code),
+      user:{name:principal.user.full_name,email:principal.user.email}};
+  });
+  app.get<{Params:{app:string}}>('/api/apps/:app/records',async(request)=>{
+    const {application,organization}=await requireProduct(request,request.params.app.toUpperCase());
+    const selected=adapter(application.code);
+    if(!selected)return {records:[],configured:false};
+    const records=await store.listRecords(selected.table,organization.id);
+    return {records};
   });
 }

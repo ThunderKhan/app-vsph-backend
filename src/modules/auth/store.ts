@@ -12,6 +12,7 @@ export interface AuthStore {
   appByCode(code:string):Promise<Application|null>;
   contexts(user:PortalProfile, app:Application):Promise<ProductContext[]>;
   listedApps():Promise<Application[]>;
+  listRecords(table:'crm_contacts'|'music_requests',organizationId:string):Promise<Record<string,unknown>[]>;
   createAppSession(row:AppSession):Promise<void>;
   appSession(tokenHash:string,portalHash:string,userId:string):Promise<AppSession|null>;
   revokeAppSession(tokenHash:string,portalHash:string):Promise<void>;
