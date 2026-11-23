@@ -16,6 +16,9 @@ import { installManagedEmployeeEnrollment } from './modules/employee-enrollment/
 import { installProjectWriteRoutes } from './modules/project-write/routes.js';
 import { installProjectGovernance } from './modules/project-governance/routes.js';
 import { installProjectWorkspace } from './modules/project-workspace/routes.js';
+import { installProjectCustomApps } from './modules/project-apps/routes.js';
+import { supabaseProjectCustomAppsStore } from './modules/project-apps/supabase-store.js';
+import type { ProjectCustomAppsStore } from './modules/project-apps/store.js';
 import { supabaseProjectWorkspaceStore } from './modules/project-workspace/supabase-store.js';
 import type { ProjectWorkspaceStore } from './modules/project-workspace/store.js';
 import { supabaseProjectGovernanceStore } from './modules/project-governance/supabase-store.js';
@@ -35,7 +38,7 @@ import type { PortalReadStore } from './modules/read/store.js';
 import { supabaseCredentialStore } from './modules/credentials/supabase-store.js';
 import type { CredentialStore } from './modules/credentials/store.js';
 
-export type Runtime = { checkDatabase?: () => Promise<boolean>; auth?: AuthDependencies; invitations?: InvitationStore; credentials?: CredentialStore; reads?: PortalReadStore; finance?: FinanceCommandStore; profile?: AccountProfileStore; employeeEnrollment?: EnrollmentStore; managedEnrollment?: ManagerEnrollmentStore; projectWrites?: ProjectWriteStore; projectGovernance?: ProjectGovernanceStore; projectWorkspace?: ProjectWorkspaceStore };
+export type Runtime = { checkDatabase?: () => Promise<boolean>; auth?: AuthDependencies; invitations?: InvitationStore; credentials?: CredentialStore; reads?: PortalReadStore; finance?: FinanceCommandStore; profile?: AccountProfileStore; employeeEnrollment?: EnrollmentStore; managedEnrollment?: ManagerEnrollmentStore; projectWrites?: ProjectWriteStore; projectGovernance?: ProjectGovernanceStore; projectWorkspace?: ProjectWorkspaceStore; projectApps?: ProjectCustomAppsStore };
 /** Builds without external side effects. Provider connections are opt-in and never fabricated. */
 export function buildApp(env: Env, runtime: Runtime = {}): FastifyInstance {
   const app = Fastify({
@@ -90,6 +93,8 @@ export function buildApp(env: Env, runtime: Runtime = {}): FastifyInstance {
     runtime.projectGovernance??supabaseProjectGovernanceStore(env));
   installProjectWorkspace(app,runtime.auth?.store??supabaseAuthStore(env),
     runtime.projectWorkspace??supabaseProjectWorkspaceStore(env));
+  installProjectCustomApps(app,runtime.auth?.store??supabaseAuthStore(env),
+    runtime.projectApps??supabaseProjectCustomAppsStore(env));
   app.setNotFoundHandler((_request, reply) => reply.code(404).send({ message: 'Not found.', code: 'NOT_FOUND' }));
   return app;
 }
