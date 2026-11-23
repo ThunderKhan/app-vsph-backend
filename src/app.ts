@@ -3,8 +3,12 @@ import { type Env, hasSupabase } from './config.js';
 import { errorBody, HttpError } from './errors.js';
 import { databaseReachable } from './repositories/supabase.js';
 import { installAuthRoutes, type AuthDependencies } from './modules/auth/routes.js';
+import { installInvitationRoutes } from './modules/invitations/routes.js';
+import { supabaseInvitationStore } from './modules/invitations/supabase-store.js';
+import type { InvitationStore } from './modules/invitations/store.js';
+import { supabaseAuthStore } from './modules/auth/supabase-store.js';
 
-export type Runtime = { checkDatabase?: () => Promise<boolean>; auth?: AuthDependencies };
+export type Runtime = { checkDatabase?: () => Promise<boolean>; auth?: AuthDependencies; invitations?: InvitationStore };
 /** Builds without external side effects. Provider connections are opt-in and never fabricated. */
 export function buildApp(env: Env, runtime: Runtime = {}): FastifyInstance {
   const app = Fastify({
@@ -44,6 +48,8 @@ export function buildApp(env: Env, runtime: Runtime = {}): FastifyInstance {
     });
   });
   installAuthRoutes(app,env,runtime.auth);
+  installInvitationRoutes(app,runtime.auth?.store??supabaseAuthStore(env),
+    runtime.invitations??supabaseInvitationStore(env));
   app.setNotFoundHandler((_request, reply) => reply.code(404).send({ message: 'Not found.', code: 'NOT_FOUND' }));
   return app;
 }
