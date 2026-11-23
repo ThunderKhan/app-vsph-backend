@@ -11,6 +11,9 @@ import { installTemporaryCredentials } from './modules/credentials/routes.js';
 import { installReadRoutes } from './modules/read/routes.js';
 import { installFinanceCommands } from './modules/finance/routes.js';
 import { installFinanceJournal } from './modules/finance/journal-routes.js';
+import { installOrganizations } from './modules/organizations/routes.js';
+import { supabaseOrganizationStore } from './modules/organizations/supabase-store.js';
+import type { OrganizationStore } from './modules/organizations/store.js';
 import { supabaseFinanceJournalStore } from './modules/finance/journal-supabase-store.js';
 import type { FinanceJournalStore } from './modules/finance/journal-store.js';
 import { installProfileRoutes } from './modules/profile/routes.js';
@@ -47,7 +50,7 @@ import type { PortalReadStore } from './modules/read/store.js';
 import { supabaseCredentialStore } from './modules/credentials/supabase-store.js';
 import type { CredentialStore } from './modules/credentials/store.js';
 
-export type Runtime = { checkDatabase?: () => Promise<boolean>; auth?: AuthDependencies; invitations?: InvitationStore; credentials?: CredentialStore; reads?: PortalReadStore; finance?: FinanceCommandStore; journal?: FinanceJournalStore; profile?: AccountProfileStore; employeeEnrollment?: EnrollmentStore; managedEnrollment?: ManagerEnrollmentStore; projectWrites?: ProjectWriteStore; projectGovernance?: ProjectGovernanceStore; projectWorkspace?: ProjectWorkspaceStore; projectApps?: ProjectCustomAppsStore; notifications?: NotificationStore; reports?: ProjectReportStore };
+export type Runtime = { checkDatabase?: () => Promise<boolean>; auth?: AuthDependencies; invitations?: InvitationStore; credentials?: CredentialStore; reads?: PortalReadStore; finance?: FinanceCommandStore; journal?: FinanceJournalStore; organizations?: OrganizationStore; profile?: AccountProfileStore; employeeEnrollment?: EnrollmentStore; managedEnrollment?: ManagerEnrollmentStore; projectWrites?: ProjectWriteStore; projectGovernance?: ProjectGovernanceStore; projectWorkspace?: ProjectWorkspaceStore; projectApps?: ProjectCustomAppsStore; notifications?: NotificationStore; reports?: ProjectReportStore };
 /** Builds without external side effects. Provider connections are opt-in and never fabricated. */
 export function buildApp(env: Env, runtime: Runtime = {}): FastifyInstance {
   const app = Fastify({
@@ -108,6 +111,8 @@ export function buildApp(env: Env, runtime: Runtime = {}): FastifyInstance {
     runtime.projectApps??supabaseProjectCustomAppsStore(env));
   installNotificationRoutes(app,runtime.auth?.store??supabaseAuthStore(env),
     runtime.notifications??supabaseNotificationStore(env));
+  installOrganizations(app,runtime.auth?.store??supabaseAuthStore(env),
+    runtime.organizations??supabaseOrganizationStore(env));
   installProjectReports(app,runtime.auth?.store??supabaseAuthStore(env),
     runtime.reports??supabaseProjectReportStore(env));
   app.setNotFoundHandler((_request, reply) => reply.code(404).send({ message: 'Not found.', code: 'NOT_FOUND' }));
