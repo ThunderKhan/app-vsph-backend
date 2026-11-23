@@ -126,7 +126,7 @@ export function installAuthRoutes(app:FastifyInstance, env:Env,deps:AuthDependen
       catch(error){await store.revokePortal(hash);throw error;}
     }
     reply.header('Set-Cookie',[
-      ...expireCookies(cookies,secure),
+      ...expireCookies(cookies,secure).filter(line=>!line.startsWith(PORTAL_COOKIE+'=')),
       sessionSetCookie(PORTAL_COOKIE,raw,secure,SESSION_HOURS*3600),
     ]);
     return {message:'Signed in.',user:principalFields(user)};
