@@ -57,7 +57,7 @@ test('role and tenant are SQL-authoritative; action mapping cannot grant owner r
  try{
   const bad=await app.inject({method:'POST',url:'/api/projects/'+project+'/workforce/assign',
    headers,payload:{version:2,userId:target,role:'owner',team:'Core'}});
-  assert.equal(bad.statusCode,400);assert.deepEqual(f.calls,[]);
+  assert.equal(bad.statusCode,400);assert.equal(f.calls.length,0);
   const ok=await app.inject({method:'POST',url:'/api/projects/'+project+'/workforce/manager-grant',
    headers,payload:{version:2,userId:target}});
   assert.equal(ok.statusCode,200);
