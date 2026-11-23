@@ -1,0 +1,41 @@
+import Fastify, { type FastifyInstance } from 'fastify';
+import { type Env, hasSupabase } from './config.js';
+import { errorBody, HttpError } from './errors.js';
+import { databaseReachable } from './repositories/supabase.js';
+
+export type Runtime = { checkDatabase?: () => Promise<boolean> };
+/** Builds without external side effects. Provider connections are opt-in and never fabricated. */
+export function buildApp(env: Env, runtime: Runtime = {}): FastifyInstance {
+  const app = Fastify({
+    trustProxy: false,
+    bodyLimit: 102400,
+    logger: { redact: [
+      'req.headers.authorization', 'req.headers.cookie', 'req.body.password',
+      'req.body.totpCode', 'req.body.token', 'res.headers.set-cookie',
+    ] },
+  });
+  app.addHook('onRequest', async (request, reply) => {
+    reply.header('X-Content-Type-Options', 'nosniff');
+    reply.header('Referrer-Policy', 'no-referrer');
+    reply.header('Cache-Control', 'no-store');
+    if (!['GET', 'HEAD', 'OPTIONS'].includes(request.method) &&
+        request.headers.origin !== env.PUBLIC_ORIGIN) {
+      throw new HttpError(403, 'ORIGIN_DENIED', 'Request origin not permitted.');
+    }
+  });
+  app.setErrorHandler((error, request, reply) => {
+    // No raw errors, database messages, or provider payloads in responses.
+    const mapped = errorBody(error);
+    request.log.error({ errorType: error.name, status: mapped.status }, 'request failed');
+    reply.code(mapped.status).send(mapped.body);
+  });
+  app.get('/api/health', async (_request, reply) => {
+    const ok = hasSupabase(env) && await (runtime.checkDatabase?.() ?? databaseReachable(env));
+    return reply.code(ok ? 200 : 503).send({
+      status: ok ? 'ok' : hasSupabase(env) ? 'database_unavailable' : 'not_configured',
+      database: ok, releaseReady: false, scope: 'database-connectivity-only',
+    });
+  });
+  app.setNotFoundHandler((_request, reply) => reply.code(404).send({ message: 'Not found.', code: 'NOT_FOUND' }));
+  return app;
+}
