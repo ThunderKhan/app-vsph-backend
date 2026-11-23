@@ -72,16 +72,16 @@ export function installCustomers(app:FastifyInstance,auth:AuthStore,store:Custom
  function noQuery(req:FastifyRequest):void{
   if(Object.keys(req.query as Record<string,unknown>).length)invalid();
  }
- app.get('/api/customers',async req=>{
+ app.get('/api/admin-management/customers',async req=>{
   const who=await owner(req),p=cursor.safeParse(req.query);
   if(!p.success)return invalid('Invalid cursor.');
   return store.command(who,'list',null,p.data.afterId?{afterId:p.data.afterId}:{});
  });
- app.get<{Params:{id:string}}>('/api/customers/:id',async req=>{
+ app.get<{Params:{id:string}}>('/api/admin-management/customers/:id',async req=>{
   const who=await owner(req);noQuery(req);
   return store.command(who,'read',id(req.params.id),{});
  });
- app.post<{Params:{id:string}}>('/api/customers/:id/invitations',async(req,reply)=>{
+ app.post<{Params:{id:string}}>('/api/admin-management/customers/:id/invitations',async(req,reply)=>{
   const who=await owner(req),org=id(req.params.id),request=invitation(req.body,org);
   const key=req.headers['idempotency-key'];
   if(typeof key!=='string'||!uuid.test(key))
@@ -95,20 +95,20 @@ export function installCustomers(app:FastifyInstance,auth:AuthStore,store:Custom
    message:'Invitation queued. Delivery is not yet confirmed.'};
  });
  for(const action of ['member','role'] as const){
-  app.post<{Params:{id:string}}>('/api/customers/:id/'+action,async req=>{
+  app.post<{Params:{id:string}}>('/api/admin-management/customers/:id/'+action,async req=>{
    const who=await owner(req),org=id(req.params.id);
    const p=(action==='member'?member:role).safeParse(req.body);
    if(!p.success)return invalid('Invalid membership mutation.');
    return store.command(who,action,org,p.data);
   });
  }
- app.get<{Params:{id:string}}>('/api/customers/:id/impact',async req=>{
+ app.get<{Params:{id:string}}>('/api/admin-management/customers/:id/impact',async req=>{
   const who=await owner(req);noQuery(req);
   return store.lifecycle(who,'preview',id(req.params.id),{});
  });
  const schemas={status,subscription,access,entitlement};
  app.post<{Params:{id:string;action:string}}>(
-  '/api/customers/:id/lifecycle/:action',async req=>{
+  '/api/admin-management/customers/:id/lifecycle/:action',async req=>{
    const who=await owner(req),org=id(req.params.id),action=req.params.action;
    if(!Object.hasOwn(schemas,action))return invalid('Invalid lifecycle action.');
    const p=schemas[action as keyof typeof schemas].safeParse(req.body);
