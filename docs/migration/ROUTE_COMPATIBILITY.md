@@ -38,7 +38,7 @@ Status is **source-wired**, not live/staging certified. `Wired` means a Fastify 
 | `GET /api/apps/:app/context` — Current bound application session, organization, role and capabilities | src/app/api/apps/[app]/context/route.ts | Same path; `src/modules/auth/routes.ts; src/modules/products/adapters.ts` | Active portal + active product session (for context/records); membership, product role, live subscription, grant | Wrong tenant, expired product session, revoked grant, inactive subscription, role mismatch | Wired |
 | `GET /api/apps/:app/records` — Tenant-scoped CRM/Music adapter data (max 100) | src/app/api/apps/[app]/records/route.ts | Same path; `src/modules/auth/routes.ts; src/modules/products/adapters.ts` | Active portal + active product session (for context/records); membership, product role, live subscription, grant | Wrong tenant, expired product session, revoked grant, inactive subscription, role mismatch | Wired |
 | `POST /api/apps/:app/records` — Create adapter record with no cross-tenant override; durable retry protection | src/app/api/apps/[app]/records/route.ts | Same path; `src/modules/auth/routes.ts; src/modules/products/adapters.ts` | Active app session, role, atomic tenant/idempotency fence | Wrong tenant, expired product session, revoked grant, inactive subscription, role mismatch | Blocked |
-| `GET /api/workspaces` — Current user's workspace metadata | SSR portalApi('/api/workspaces') | Same path; `src/modules/auth/routes.ts; src/modules/products/adapters.ts` | Portal + current scoped organization/product grants | Wrong tenant, expired product session, revoked grant, inactive subscription, role mismatch | Pending |
+| `GET /api/workspaces` — Current user's workspace metadata | SSR portalApi('/api/workspaces') | Same path; `src/modules/auth/routes.ts; src/modules/workspaces/*` | Portal + current scoped organization/product grants | Wrong tenant, expired product session, revoked grant, inactive subscription, role mismatch | Wired |
 
 ## Customer provisioning and invitations
 
@@ -238,7 +238,7 @@ Status is **source-wired**, not live/staging certified. `Wired` means a Fastify 
 
 ## Coverage and proof gates
 
-- 171 explicit legacy HTTP entrypoints (including dynamic action families); 77 source-wired, 2 partial, and 92 blocked/pending. Dynamic action families are not independently certified; source-wired does not imply live SQL/provider acceptance.
+- 171 explicit legacy HTTP entrypoints (including dynamic action families); 78 source-wired, 2 partial, and 91 blocked/pending. Dynamic action families are not independently certified; source-wired does not imply live SQL/provider acceptance.
 - A route is not complete until its exact response schema, error code, cookie semantics, SQL authorization and role/tenant-negative cases pass with the intended frontend proxy. Status intentionally excludes mere presence of a TypeScript handler.
 - The original Express source has additional service-only worker commands, GitHub sync, outbox delivery and SQL helper functions **not exposed as HTTP endpoints**. They require separate worker inventory/acceptance, not fictitious HTTP rows.
 - No Prisma schema or production migrations should be inferred from this matrix. Confirm checked-in SQL history against an approved isolated staging snapshot before mapping ORM models or privileged RPCs.

@@ -12,6 +12,7 @@
 - Opaque SHA-256 hashed portal/app sessions, current profile checks, product session bound to live portal session, stale/disabled identity denial, product entitlement checks; API HTTP routes wired.
 - `POST /api/auth/login`, `GET /api/auth/me`, `POST /api/auth/logout`, `POST /api/auth/app-login`, `POST /api/auth/app-logout`.
 - `GET /api/apps`, `GET /api/apps/:app/contexts`, `GET /api/apps/:app/context`, `GET /api/apps/:app/records` with static CRM/Music adapters and scoped reads.
+- `GET /api/workspaces` restores the original platform-owner total / ordinary user's active-organization count semantics, with actor-bound membership queries and no frontend-supplied tenant IDs.
 - `GET /api/account/sessions`, `POST /api/account/sessions/revoke-others`, `POST /api/account/sessions/:id/revoke`, using the original service-only `session_command` RPC.
 - Account profile GET/PATCH now use the original `account_profile` RPC with trusted actor/current session, strict version/time-zone validation and negative authorization tests.
 - Finance invoice issuance, receipt recording, receipt reversal and invoice void now dispatch to the original atomic `finance_command` SQL RPC with strict integer-paise validation, idempotency keys and owner prechecks. Tests use isolated stores; native financial integrity is not yet proven.
@@ -27,7 +28,7 @@
 - Employee temporary sign-in uses verified Supabase user enrollment metadata and a successful legacy `internal_employee_credentials.login` before issuing a 10-minute setup cookie (no portal session).
 - `GET /api/employee-credentials/status` and `POST /api/employee-credentials/replace` now use the original SQL reserve/reject/finish/failed lifecycle and verify the reserved provider identity. The real provider+database workflow remains unverified.
 - Unit and Fastify inject tests cover sessions, role/tenant enforcement, MFA, cookie parsing, revocation, finance, private invitations and employee enrollment. Check the latest GitHub Actions run for actual execution results; mocks are not live-provider proof.
-- Dockerfile, Compose isolated ephemeral PostgreSQL profile. A dependency lockfile was derived from v3; Node 24 `npm ci` successfully executed in GitHub Actions on earlier commit `71e73cdd`. Latest head must be revalidated.
+- Dockerfile, Compose isolated ephemeral PostgreSQL profile. A dependency lockfile was derived from v3; Node 24 `npm ci` successfully executed in GitHub Actions on earlier commit `71e73cdd`; full CI passed at `ec25fa03` (Node 24 + Docker). Latest head must be revalidated.
 
 ## Known compatibility differences and implementation warnings
 
@@ -41,7 +42,7 @@
 
 - No approved isolated Supabase and native PostgreSQL migration-history verification; no proof that live deployed tables/RPC privileges match the checked-in manifest.
 - No live Supabase MFA credential tests, temporary password/invitation provider tests, real role/tenant journeys, secure external integration receiver.
-- Runtime here cannot execute native SQL acceptance; GitHub Actions validates Node 24 `npm ci`, typecheck, lint, unit tests, build, and Docker without local credentials. GitHub Actions passed at checkpoint `8d4e828e` (Node 24 clean install, TypeScript, lint, isolated tests, build and Docker/Compose); newer reporting commits require latest-head revalidation. Native DB and live provider acceptance are still unavailable.
+- Runtime here cannot execute native SQL acceptance; GitHub Actions validates Node 24 `npm ci`, typecheck, lint, unit tests, build, and Docker without local credentials. GitHub Actions passed at checkpoint `ec25fa03` (Node 24 clean install, TypeScript, lint, isolated tests, build and Docker/Compose); workspaces and documentation on newer commits still require latest-head revalidation. Native DB and live provider acceptance are still unavailable.
 - No cloud configuration, DNS, production schema, tokens or other live secrets were touched.
 - `GET /api/health` reports database connectivity only, never production rollout readiness.
 
@@ -56,11 +57,11 @@
 ## Gate checklist
 
 - [x] Node 24 clean npm ci validated on earlier GitHub Actions run (latest head must revalidate)
-- [ ] Type check
-- [ ] ESLint
-- [ ] Unit and HTTP tests
+- [x] Type check on prior `ec25fa03` (latest-head rerun pending)
+- [x] ESLint on prior `ec25fa03` (latest-head rerun pending)
+- [x] Unit and HTTP tests on prior `ec25fa03` (latest-head rerun pending)
 - [ ] Isolated native PostgreSQL SQL/RPC + negative tenant tests
-- [ ] Docker Compose checks
+- [x] Docker Compose/build checks on prior `ec25fa03` (latest-head rerun pending)
 - [ ] Actual Supabase MFA/employee/customer flows on approved staging
 - [ ] GitHub, Music, Outreach provider acceptance
 - [ ] Security, snapshot backup, restore, deploy and rollback review
