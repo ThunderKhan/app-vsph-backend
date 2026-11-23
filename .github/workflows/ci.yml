@@ -2,9 +2,6 @@ name: backend-migration-checks
 
 on:
   pull_request:
-  push:
-    branches:
-      - migration/fastify-backend-parity
 
 permissions:
   contents: read
@@ -34,5 +31,7 @@ jobs:
     timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
+      - name: Validate Compose syntax
+        run: docker compose config --quiet
       - name: Build image without connecting to any provider
         run: docker build --tag vsph-backend-migration:ci .

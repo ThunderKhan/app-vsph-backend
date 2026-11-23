@@ -13,6 +13,7 @@
 - `POST /api/auth/login`, `GET /api/auth/me`, `POST /api/auth/logout`, `POST /api/auth/app-login`, `POST /api/auth/app-logout`.
 - `GET /api/apps`, `GET /api/apps/:app/contexts`, `GET /api/apps/:app/context`, `GET /api/apps/:app/records` with static CRM/Music adapters and scoped reads.
 - `GET /api/account/sessions`, `POST /api/account/sessions/revoke-others`, `POST /api/account/sessions/:id/revoke`, using the original service-only `session_command` RPC.
+- Account profile GET/PATCH now use the original `account_profile` RPC with trusted actor/current session, strict version/time-zone validation and negative authorization tests.
 - Finance invoice issuance, receipt recording, receipt reversal and invoice void now dispatch to the original atomic `finance_command` SQL RPC with strict integer-paise validation, idempotency keys and owner prechecks. Tests use isolated stores; native financial integrity is not yet proven.
 - Read-only projects (list/detail/manager overview), filtered search, HRMS access and finance dashboard/overview via original privileged RPCs. Owner role is checked before finance; actor and current session hash are never browser supplied. Native SQL permission tests still required.
 - Customer invitation inspection/acceptance uses hashed capability, SQL `provisioning_command` inspect/reserve/finish/failed transitions and only the reserved provider identity. **SQL/provider acceptance unverified.**
