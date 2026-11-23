@@ -36,7 +36,7 @@ export function buildApp(env: Env, runtime: Runtime = {}): FastifyInstance {
   app.setErrorHandler((error, request, reply) => {
     // No raw errors, database messages, or provider payloads in responses.
     const mapped = errorBody(error);
-    request.log.error({ errorType: error.name, status: mapped.status }, 'request failed');
+    request.log.error({ errorType: error instanceof Error ? error.name : 'Unknown', status: mapped.status }, 'request failed');
     if(mapped.status===429)reply.header('Retry-After','60');
     reply.code(mapped.status).send(mapped.body);
   });
