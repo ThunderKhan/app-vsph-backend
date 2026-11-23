@@ -9,7 +9,7 @@ import type {ProjectCustomAppsStore} from './store.js';
 const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const validUrl=(value:string):boolean=>{
  if(!value)return true;
- if(value.length>1000||!/^\x68ttps:\/\/[A-Za-z0-9.-]+(?::[0-9]{1,5})?(?:\/[A-Za-z0-9._~/%-]*)?$/.test(value))return false;
+ if(value.length>1000||!/^https:\/\/[A-Za-z0-9.-]+(?::[0-9]{1,5})?(?:\/[A-Za-z0-9._~/%-]*)?$/.test(value))return false;
  try{
   const u=new URL(value);return u.protocol==='https:'&&!u.username&&!u.password&&!u.search&&!u.hash;
  }catch{return false;}
