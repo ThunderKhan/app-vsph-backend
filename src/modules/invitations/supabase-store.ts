@@ -29,7 +29,7 @@ export function supabaseInvitationStore(env:Env):InvitationStore {
     },
     async setNewIdentityPassword(userId,password) {
       const result=await client().auth.admin.updateUserById(userId,{password,email_confirm:true});
-      if(result.error)throw new Error('Invited account provider update failed');
+      if(result.error||result.data?.user?.id!==userId)throw new Error('Invited account provider update failed');
     },
     finish:async(id,hash,actor,acceptanceId)=>{
       await command('finish_accept',id,hash,actor,acceptanceId);

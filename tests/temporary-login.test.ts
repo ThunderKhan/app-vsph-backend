@@ -6,7 +6,6 @@ import type {AuthStore} from '../src/modules/auth/store.js';
 
 const env=parseEnv({NODE_ENV:'test',PUBLIC_ORIGIN:'http://localhost:3000'});
 const userId='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
-const token='vsph.employee.setup';
 function appFor(metadata:Record<string,unknown>|undefined, allow=true) {
   let temporaryCalls=0,normalPortals=0;
   const store:AuthStore={

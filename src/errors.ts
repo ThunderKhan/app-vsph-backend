@@ -12,7 +12,7 @@ export function errorBody(error: unknown): { status: number; body: Record<string
   if (error instanceof IdentityError) {
     return {status: error.status, body: identityErrorBody(error)};
   }
-  if (error instanceof HttpError && error.status >= 400 && error.status < 500) {
+  if (error instanceof HttpError && error.status >= 400 && error.status <= 503) {
     return { status: error.status, body: { message: error.message, code: error.code,
       ...(error.details ?? {}) } };
   }
