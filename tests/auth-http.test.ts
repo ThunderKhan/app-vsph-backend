@@ -20,6 +20,7 @@ function state() {
     createPortal:async(token_hash,user_id,expires_at)=>{sessions.set(token_hash,{token_hash,user_id,expires_at,profile:user});},
     revokePortal:async hash=>{sessions.delete(hash);for(const [key,a] of apps)if(a.portal_token_hash===hash)apps.delete(key);},
     temporaryLogout:async()=>{},
+    temporaryLogin:async()=>false,
     appByCode:async code=>code==='CRM'?application:null,
     contexts:async()=>[{id:org,name:'Org A',status:'active',role:'manager'}],
     listedApps:async()=>[application],

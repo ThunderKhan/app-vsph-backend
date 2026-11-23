@@ -98,18 +98,37 @@ export function installAuthRoutes(app:FastifyInstance, env:Env,deps:AuthDependen
     if(!parsed.success)return invalid();
     const verified=await verify(parsed.data);
     const user=await store.activeProfile(verified.user.id);
-    // Employee temporary credential sign-in is a separate pending flow; never issue a
-    // normal portal session without a currently active profile.
-    if(!user||user.status!=='active')throw new HttpError(403,'ACCOUNT_NOT_ACTIVE',
-      'Account is not enabled or temporary credentials are unavailable.');
+    if(!user||user.status!=='active') {
+      // This only follows real Supabase password/MFA verification. The enrollment
+      // metadata is provided by the provider, never by the browser.
+      const enrollment=verified.user.app_metadata?.vsph_employee_enrollment;
+      if(typeof enrollment!=='string'||!uuid.test(enrollment))
+        throw new HttpError(403,'ACCOUNT_NOT_ACTIVE','Account is not enabled.');
+      const setupRaw=newSessionToken();
+      const permitted=await store.temporaryLogin(verified.user.id,verified.assurance,
+        hashSessionToken(setupRaw),hashSessionToken(parsed.data.password));
+      if(!permitted)throw new HttpError(403,'ACCOUNT_NOT_ACTIVE',
+        'Temporary credentials are invalid or expired.');
+      reply.header('Set-Cookie',sessionSetCookie(EMPLOYEE_SETUP_COOKIE,setupRaw,secure,600));
+      return {passwordChangeRequired:true,redirect:'/employee-password'};
+    }
     const raw=newSessionToken(),hash=hashSessionToken(raw);
     await store.createPortal(hash,user.id,future());
-    const old=sessionCookies(request)[PORTAL_COOKIE];
+    const cookies=sessionCookies(request);
+    const old=cookies[PORTAL_COOKIE];
+    // Normal portal sessions must not leave an active temporary setup capability.
+    if(cookies[EMPLOYEE_SETUP_COOKIE]){
+      try{await store.temporaryLogout(hashSessionToken(cookies[EMPLOYEE_SETUP_COOKIE]));}
+      catch(error){await store.revokePortal(hash);throw error;}
+    }
     if(old){
       try {await store.revokePortal(hashSessionToken(old));}
       catch(error){await store.revokePortal(hash);throw error;}
     }
-    reply.header('Set-Cookie',sessionSetCookie(PORTAL_COOKIE,raw,secure,SESSION_HOURS*3600));
+    reply.header('Set-Cookie',[
+      ...expireCookies(cookies,secure),
+      sessionSetCookie(PORTAL_COOKIE,raw,secure,SESSION_HOURS*3600),
+    ]);
     return {message:'Signed in.',user:principalFields(user)};
   });
   app.get('/api/auth/me',async(request)=>({user:principalFields((await requirePortal(request)).user)}));

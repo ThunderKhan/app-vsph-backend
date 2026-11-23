@@ -30,6 +30,19 @@ export function supabaseAuthStore(env: Env): AuthStore {
       checked(await db().from('portal_sessions').delete().eq('token_hash',hash));
       // Checked-in schema uses ON DELETE CASCADE from app_sessions to portal_sessions.
     },
+    async temporaryLogin(userId,assurance,setupHash,passwordHash) {
+      const result=await db().rpc('internal_employee_credentials',{
+        p_actor:userId,p_action:'login',p_id:null,
+        p_data:{setupHash,assurance,temporaryHash:passwordHash,verifiedAt:new Date().toISOString()},
+      });
+      // The SQL routine must prove that this is the verified temporary credential.
+      // Revoked, missing, or pre-migration states cannot produce a portal session.
+      if(result.error){
+        if(['42501','40001','PGRST202','42883'].includes(result.error.code))return false;
+        throw new RpcError(result.error.code??'UNKNOWN');
+      }
+      return true;
+    },
     async temporaryLogout(hash) {
       const result=await db().rpc('internal_employee_credentials',{p_actor:null,p_action:'logout',
         p_id:null,p_data:{setupHash:hash}});

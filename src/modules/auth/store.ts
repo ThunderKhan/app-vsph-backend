@@ -9,6 +9,7 @@ export interface AuthStore {
   createPortal(tokenHash:string,userId:string,expiresAt:string):Promise<void>;
   revokePortal(tokenHash:string):Promise<void>;
   temporaryLogout(setupHash:string):Promise<void>;
+  temporaryLogin(userId:string,assurance:'aal1'|'aal2',setupHash:string,passwordHash:string):Promise<boolean>;
   appByCode(code:string):Promise<Application|null>;
   contexts(user:PortalProfile, app:Application):Promise<ProductContext[]>;
   listedApps():Promise<Application[]>;

@@ -22,7 +22,7 @@ function fake(newIdentity:boolean) {
  };
  const auth:AuthStore={
   activeProfile:async()=>null,portalSession:async()=>null,createPortal:async()=>{},
-  revokePortal:async()=>{},temporaryLogout:async()=>{},appByCode:async()=>null,
+  revokePortal:async()=>{},temporaryLogout:async()=>{},temporaryLogin:async()=>false,appByCode:async()=>null,
   contexts:async()=>[],listedApps:async()=>[],listRecords:async()=>[],
   sessionCommand:async()=>null,createAppSession:async()=>{},appSession:async()=>null,
   revokeAppSession:async()=>{},revokeAppByToken:async()=>{},

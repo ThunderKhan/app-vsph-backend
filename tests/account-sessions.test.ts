@@ -15,7 +15,7 @@ test('current session and actor are supplied only by backend, never request body
  const calls:unknown[][]=[];
  const store:AuthStore={
    activeProfile:async()=>null,portalSession:async input=>input===hash?session:null,
-   createPortal:async()=>{},revokePortal:async()=>{},temporaryLogout:async()=>{},
+   createPortal:async()=>{},revokePortal:async()=>{},temporaryLogout:async()=>{},temporaryLogin:async()=>false,
    appByCode:async()=>null,contexts:async()=>[],listedApps:async()=>[],listRecords:async()=>[],
    createAppSession:async()=>{},appSession:async()=>null,revokeAppSession:async()=>{},revokeAppByToken:async()=>{},
    sessionCommand:async(...args)=>{calls.push(args);return {sessions:[]};},
