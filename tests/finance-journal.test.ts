@@ -47,7 +47,7 @@ test('journal validates exact filters and supplies trusted actor to finance_jour
    filters:{organizationId:org,status:'reversed',search:'receipt'}}]);
   for(const q of ['actor=evil','kind=unknown','kind=receipts&status=issued',
    'from=2026-02-30','from=2026-12-01&to=2026-11-01',
-   'search=%0Ainvalid','organizationId=invalid','cursor=%7B%7D']){
+   'search=bad%0Avalue','organizationId=invalid','cursor=%7B%7D']){
    const response=await app.inject({method:'GET',headers,url:'/api/finance/journal?'+q});
    assert.equal(response.statusCode,400,q+' '+response.body);
   }
