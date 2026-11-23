@@ -18,6 +18,7 @@
 - Read-only projects (list/detail/manager overview), filtered search, HRMS access and finance dashboard/overview via original privileged RPCs. Owner role is checked before finance; actor and current session hash are never browser supplied. Native SQL permission tests still required.
 - Versioned project creation/update, tasks, milestones, comments and deliverables now route into the original `project_command` SQL transaction. Manager appointment uses the reviewed `project_creation_command`; a missing schema blocks nonempty manager assignment rather than silently dropping it. Negative tests cover forged actor, invalid objects, tenant-denied SQL, stale versions and insecure URLs.
 - Project workforce directory, role assignment/revoke, member governance and guarded archive/delete now use the original `project_workforce_command`, `project_command` and `project_lifecycle_command`. SQL retains ownership, protected-role and dependency audit invariants. **Native SQL tests remain required.**
+- Project workspace GET and action POST now use `project_workspace_command` for versioned milestone checklist, risks, resources and weekly updates. Inputs preserve frozen action names and strict UUID, HTTPS URL, enum, and version validation. Mock tests include origin, actor and SQL denial cases.
 - Customer invitation inspection/acceptance uses hashed capability, SQL `provisioning_command` inspect/reserve/finish/failed transitions and only the reserved provider identity. **SQL/provider acceptance unverified.**
 - Employee enrollment inspection/acceptance now uses one-use SQL `internal_employee_enrollment` proof, durable reserve/finish/reject/failed transitions, and strict provider identity matching. Managed review/start/renew/ready/cancel uses session-bound SQL authority, current roster versions, one-use capabilities and UUID idempotency. Manual delivery only; email is explicitly unavailable until an approved adapter is configured. Native SQL/provider acceptance is still required.
 - Employee temporary sign-in uses verified Supabase user enrollment metadata and a successful legacy `internal_employee_credentials.login` before issuing a 10-minute setup cookie (no portal session).
@@ -44,7 +45,7 @@
 ## Next prioritized slices
 
 1. Finish manager-initiated temporary credential issuance and verify employee/customer one-use state transitions in disposable native PostgreSQL/Supabase.
-2. Complete project workspace, custom applications, engineering delivery, organizations, customers and HRMS through their existing privileged SQL commands; add native tenant/role-negative tests.
+2. Complete project custom applications, engineering delivery, organizations, customers and HRMS using the original privileged SQL commands; verify completed project-workspace operations in a disposable database.
 3. Verify finance integer-paise transactional integrity and correction/audit flows against the disposable SQL migration history, plus add journal/owner retrieval.
 4. GitHub delivery, Music/Outreach, workers with explicit provider gates.
 5. Verify exact frontend API contract matrix and integration acceptance before enabling production traffic.
