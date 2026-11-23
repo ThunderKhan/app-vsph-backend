@@ -10,6 +10,9 @@ import { supabaseAuthStore } from './modules/auth/supabase-store.js';
 import { installTemporaryCredentials } from './modules/credentials/routes.js';
 import { installReadRoutes } from './modules/read/routes.js';
 import { installFinanceCommands } from './modules/finance/routes.js';
+import { installFinanceJournal } from './modules/finance/journal-routes.js';
+import { supabaseFinanceJournalStore } from './modules/finance/journal-supabase-store.js';
+import type { FinanceJournalStore } from './modules/finance/journal-store.js';
 import { installProfileRoutes } from './modules/profile/routes.js';
 import { installPublicEmployeeEnrollment } from './modules/employee-enrollment/routes.js';
 import { installManagedEmployeeEnrollment } from './modules/employee-enrollment/manager-routes.js';
@@ -44,7 +47,7 @@ import type { PortalReadStore } from './modules/read/store.js';
 import { supabaseCredentialStore } from './modules/credentials/supabase-store.js';
 import type { CredentialStore } from './modules/credentials/store.js';
 
-export type Runtime = { checkDatabase?: () => Promise<boolean>; auth?: AuthDependencies; invitations?: InvitationStore; credentials?: CredentialStore; reads?: PortalReadStore; finance?: FinanceCommandStore; profile?: AccountProfileStore; employeeEnrollment?: EnrollmentStore; managedEnrollment?: ManagerEnrollmentStore; projectWrites?: ProjectWriteStore; projectGovernance?: ProjectGovernanceStore; projectWorkspace?: ProjectWorkspaceStore; projectApps?: ProjectCustomAppsStore; notifications?: NotificationStore; reports?: ProjectReportStore };
+export type Runtime = { checkDatabase?: () => Promise<boolean>; auth?: AuthDependencies; invitations?: InvitationStore; credentials?: CredentialStore; reads?: PortalReadStore; finance?: FinanceCommandStore; journal?: FinanceJournalStore; profile?: AccountProfileStore; employeeEnrollment?: EnrollmentStore; managedEnrollment?: ManagerEnrollmentStore; projectWrites?: ProjectWriteStore; projectGovernance?: ProjectGovernanceStore; projectWorkspace?: ProjectWorkspaceStore; projectApps?: ProjectCustomAppsStore; notifications?: NotificationStore; reports?: ProjectReportStore };
 /** Builds without external side effects. Provider connections are opt-in and never fabricated. */
 export function buildApp(env: Env, runtime: Runtime = {}): FastifyInstance {
   const app = Fastify({
@@ -89,6 +92,8 @@ export function buildApp(env: Env, runtime: Runtime = {}): FastifyInstance {
   installTemporaryCredentials(app,runtime.credentials??supabaseCredentialStore(env),env.NODE_ENV==='production');
   installReadRoutes(app,runtime.auth?.store??supabaseAuthStore(env),runtime.reads??supabaseReadStore(env));
   installFinanceCommands(app,runtime.auth?.store??supabaseAuthStore(env),runtime.finance??supabaseFinanceStore(env));
+  installFinanceJournal(app,runtime.auth?.store??supabaseAuthStore(env),
+    runtime.journal??supabaseFinanceJournalStore(env));
   installProfileRoutes(app,runtime.auth?.store??supabaseAuthStore(env),runtime.profile??supabaseProfileStore(env));
   installPublicEmployeeEnrollment(app,runtime.employeeEnrollment??supabaseEnrollmentStore(env));
   installManagedEmployeeEnrollment(app,env,runtime.auth?.store??supabaseAuthStore(env),
