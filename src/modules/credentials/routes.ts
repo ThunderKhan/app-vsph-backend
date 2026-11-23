@@ -58,6 +58,9 @@ export function installTemporaryCredentials(app:FastifyInstance,store:Credential
       reply.header('Set-Cookie',`${EMPLOYEE_SETUP_COOKIE}=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0${secure?'; Secure':''}`);
       return {message:'Your personal password is set. Sign in again to open your employee workspace.'};
     }catch(err){
+      // Reject completed successfully: MFA step-up is an intentional 401,
+      // not an ambiguous provider failure. Do not fall through into failed recovery.
+      if(err instanceof HttpError && err.code==='IDENTITY_STEP_UP_REQUIRED')throw err;
       if(err instanceof ProviderPasswordRejected){
         await store.reject(setupHash,nonce);
         return error(400,'PASSWORD_REJECTED','Choose a stronger personal password.');
