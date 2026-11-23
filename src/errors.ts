@@ -1,4 +1,5 @@
 import { IdentityError, identityErrorBody } from './modules/auth/credentials.js';
+import { RpcError, classifyRpcError } from './repositories/rpc-errors.js';
 export class HttpError extends Error {
   constructor(public readonly status: number, public readonly code: string,
     message: string, public readonly details?: Record<string, unknown>) {
@@ -7,6 +8,7 @@ export class HttpError extends Error {
   }
 }
 export function errorBody(error: unknown): { status: number; body: Record<string, unknown> } {
+  if(error instanceof RpcError)return classifyRpcError(error);
   if (error instanceof IdentityError) {
     return {status: error.status, body: identityErrorBody(error)};
   }

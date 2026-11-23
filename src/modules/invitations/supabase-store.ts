@@ -1,4 +1,5 @@
 import type { Env } from '../../config.js';
+import { RpcError } from '../../repositories/rpc-errors.js';
 import { serviceDatabase } from '../../repositories/supabase.js';
 import type { InvitationStore } from './store.js';
 
@@ -10,7 +11,7 @@ export function supabaseInvitationStore(env:Env):InvitationStore {
       p_actor:actorId,p_action:action,p_id:id,
       p_data:{tokenHash,...(acceptanceId?{acceptanceId}:{})},
     });
-    if(error)throw new Error('Invitation RPC failed:'+error.code);
+    if(error)throw new RpcError(error.code??'UNKNOWN');
     return data;
   }
   function record(value:unknown):{newIdentity:boolean;userId?:string} {

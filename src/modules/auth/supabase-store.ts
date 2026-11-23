@@ -1,11 +1,12 @@
 import type { Env } from '../../config.js';
+import { RpcError } from '../../repositories/rpc-errors.js';
 import { serviceDatabase } from '../../repositories/supabase.js';
 import { permittedContexts } from './entitlements.js';
 import type { PortalProfile, PortalSessionRecord } from './portal-session.js';
 import type { AuthStore, Application, AppSession, ProductContext } from './store.js';
 
 function checked<T>(result: { data: T | null; error: { code?: string; message?: string } | null }): T {
-  if (result.error) throw new Error('Database operation failed' + (result.error.code?':'+result.error.code:''));
+  if (result.error) throw new RpcError(result.error.code??'UNKNOWN');
   return result.data as T;
 }
 export function supabaseAuthStore(env: Env): AuthStore {

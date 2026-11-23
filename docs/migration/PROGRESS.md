@@ -13,6 +13,7 @@
 - `POST /api/auth/login`, `GET /api/auth/me`, `POST /api/auth/logout`, `POST /api/auth/app-login`, `POST /api/auth/app-logout`.
 - `GET /api/apps`, `GET /api/apps/:app/contexts`, `GET /api/apps/:app/context`, `GET /api/apps/:app/records` with static CRM/Music adapters and scoped reads.
 - `GET /api/account/sessions`, `POST /api/account/sessions/revoke-others`, `POST /api/account/sessions/:id/revoke`, using the original service-only `session_command` RPC.
+- Customer invitation inspection/acceptance uses hashed capability, SQL `provisioning_command` inspect/reserve/finish/failed transitions and only the reserved provider identity. **SQL/provider acceptance unverified.**
 - Unit and Fastify inject test files for absent sessions, unauthorized tenants, MFA enforcement, cookie parsing, session revocation and origin protection. **Execution not yet verified.**
 - Dockerfile, Compose isolated ephemeral PostgreSQL profile. A dependency lockfile was derived from the earlier resolved scaffold; **clean npm ci not yet verified**.
 
