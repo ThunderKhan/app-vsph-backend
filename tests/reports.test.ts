@@ -52,7 +52,7 @@ test('CSV scope remains capped and client-controlled spreadsheet formulas are es
  assert.ok(csv.startsWith('\uFEFF'));
  assert.match(csv,/' =HYPERLINK/);
  assert.match(csv,/'\t\+SUM/);
- assert.match(csv,/'""Quoted"" name/);
+ assert.match(csv,/"""Quoted"" name/);
  assert.doesNotMatch(csv,/must not export/);
  assert.throws(()=>projectCsv({projects:Array.from({length:101},()=>({id:project}))}));
 });
