@@ -29,7 +29,7 @@ function searchFilters(raw:unknown) {
  const p=query.safeParse(raw);
  if(!p.success)return bad('Use 2–100 characters and valid search filters.');
  const q=(p.data.q??'').trim(),kind=p.data.kind??'all';
- if(q.length<2||q.length>100||/[\u0000-\u001f\u007f]/.test(q))return bad();
+ if(q.length<2||q.length>100||Array.from(q).some(ch=>ch.charCodeAt(0)<32||ch.charCodeAt(0)===127))return bad();
  if(p.data.assigneeId&&kind!=='task')return bad();
  if((p.data.from&&!validDate(p.data.from))||(p.data.to&&!validDate(p.data.to))||
    (p.data.from&&p.data.to&&p.data.from>p.data.to))return bad();
