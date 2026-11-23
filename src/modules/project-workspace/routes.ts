@@ -7,8 +7,7 @@ import {resolvePortalSession,PortalSessionError} from '../auth/portal-session.js
 import type {AuthStore} from '../auth/store.js';
 import type {ProjectWorkspaceStore,WorkspaceOperation} from './store.js';
 
-const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-// Include full UUID pattern, not a prefix that could accept a guessed foreign key.
+// Full UUID validation prevents arbitrary project and resource identifiers.
 const fullUuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const id=z.string().regex(fullUuid);
 const version=z.number().int().positive().max(999999999);
