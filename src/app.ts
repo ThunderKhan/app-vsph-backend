@@ -18,6 +18,9 @@ import { installProjectGovernance } from './modules/project-governance/routes.js
 import { installProjectWorkspace } from './modules/project-workspace/routes.js';
 import { installProjectCustomApps } from './modules/project-apps/routes.js';
 import { installNotificationRoutes } from './modules/notifications/routes.js';
+import { installProjectReports } from './modules/reports/routes.js';
+import { supabaseProjectReportStore } from './modules/reports/supabase-store.js';
+import type { ProjectReportStore } from './modules/reports/store.js';
 import { supabaseNotificationStore } from './modules/notifications/supabase-store.js';
 import type { NotificationStore } from './modules/notifications/store.js';
 import { supabaseProjectCustomAppsStore } from './modules/project-apps/supabase-store.js';
@@ -41,7 +44,7 @@ import type { PortalReadStore } from './modules/read/store.js';
 import { supabaseCredentialStore } from './modules/credentials/supabase-store.js';
 import type { CredentialStore } from './modules/credentials/store.js';
 
-export type Runtime = { checkDatabase?: () => Promise<boolean>; auth?: AuthDependencies; invitations?: InvitationStore; credentials?: CredentialStore; reads?: PortalReadStore; finance?: FinanceCommandStore; profile?: AccountProfileStore; employeeEnrollment?: EnrollmentStore; managedEnrollment?: ManagerEnrollmentStore; projectWrites?: ProjectWriteStore; projectGovernance?: ProjectGovernanceStore; projectWorkspace?: ProjectWorkspaceStore; projectApps?: ProjectCustomAppsStore; notifications?: NotificationStore };
+export type Runtime = { checkDatabase?: () => Promise<boolean>; auth?: AuthDependencies; invitations?: InvitationStore; credentials?: CredentialStore; reads?: PortalReadStore; finance?: FinanceCommandStore; profile?: AccountProfileStore; employeeEnrollment?: EnrollmentStore; managedEnrollment?: ManagerEnrollmentStore; projectWrites?: ProjectWriteStore; projectGovernance?: ProjectGovernanceStore; projectWorkspace?: ProjectWorkspaceStore; projectApps?: ProjectCustomAppsStore; notifications?: NotificationStore; reports?: ProjectReportStore };
 /** Builds without external side effects. Provider connections are opt-in and never fabricated. */
 export function buildApp(env: Env, runtime: Runtime = {}): FastifyInstance {
   const app = Fastify({
@@ -100,6 +103,8 @@ export function buildApp(env: Env, runtime: Runtime = {}): FastifyInstance {
     runtime.projectApps??supabaseProjectCustomAppsStore(env));
   installNotificationRoutes(app,runtime.auth?.store??supabaseAuthStore(env),
     runtime.notifications??supabaseNotificationStore(env));
+  installProjectReports(app,runtime.auth?.store??supabaseAuthStore(env),
+    runtime.reports??supabaseProjectReportStore(env));
   app.setNotFoundHandler((_request, reply) => reply.code(404).send({ message: 'Not found.', code: 'NOT_FOUND' }));
   return app;
 }
