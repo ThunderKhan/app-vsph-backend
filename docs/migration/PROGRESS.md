@@ -41,16 +41,16 @@
 
 - No approved isolated Supabase and native PostgreSQL migration-history verification; no proof that live deployed tables/RPC privileges match the checked-in manifest.
 - No live Supabase MFA credential tests, temporary password/invitation provider tests, real role/tenant journeys, secure external integration receiver.
-- Runtime here provides Node 22 and no GitHub network or Docker; GitHub Actions validates Node 24 `npm ci`, typecheck, lint, unit tests, build, and Docker without local credentials. GitHub Actions passed at checkpoint `8d4e828e` (Node 24 clean install, TypeScript, lint, isolated tests, build and Docker/Compose); newer reporting commits require latest-head revalidation. Native DB and live provider acceptance are still unavailable.
+- Runtime here cannot execute native SQL acceptance; GitHub Actions validates Node 24 `npm ci`, typecheck, lint, unit tests, build, and Docker without local credentials. GitHub Actions passed at checkpoint `8d4e828e` (Node 24 clean install, TypeScript, lint, isolated tests, build and Docker/Compose); newer reporting commits require latest-head revalidation. Native DB and live provider acceptance are still unavailable.
 - No cloud configuration, DNS, production schema, tokens or other live secrets were touched.
 - `GET /api/health` reports database connectivity only, never production rollout readiness.
 
 ## Next prioritized slices
 
 1. Finish manager-initiated temporary credential issuance and verify employee/customer one-use state transitions in disposable native PostgreSQL/Supabase.
-2. Continue engineering delivery, organizations, customers and HRMS using existing privileged SQL commands; verify all source-wired project routines in disposable PostgreSQL.
-3. Verify finance integer-paise transactional integrity and correction/audit flows against the disposable SQL migration history, plus add journal/owner retrieval.
-4. Add finance owner journal and exact snapshot verification; continue GitHub delivery, Music/Outreach, notification workers and background jobs with explicit provider gates.
+2. Continue engineering delivery, organization ownership step-up, customers, HRMS and admin-onboarding using existing privileged SQL commands; verify all source-wired project routines in disposable PostgreSQL.
+3. Verify finance integer-paise transactional integrity, journal filters/cursors and correction/audit flows against the disposable SQL migration history.
+4. Add native finance snapshot verification; continue GitHub delivery, Music/Outreach, notification workers and background jobs with explicit provider gates.
 5. Verify exact frontend API contract matrix and integration acceptance before enabling production traffic.
 
 ## Gate checklist

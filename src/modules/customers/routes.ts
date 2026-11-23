@@ -45,7 +45,7 @@ function invitation(raw:unknown,organizationId:string):Record<string,unknown>{
  const p=invite.safeParse(raw);
  if(!p.success)return invalid('Provide name, email, organization role and explicit product roles.');
  const name=p.data.name.trim(),email=p.data.email.trim().toLowerCase();
- if(!name||name.length>150||/[\u0000-\u001f\u007f]/.test(name)||
+ if(!name||name.length>150||Array.from(name).some(ch=>ch.charCodeAt(0)<32||ch.charCodeAt(0)===127)||
    email.length>190||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)||
    new Set(p.data.products.map(x=>x.applicationId.toLowerCase())).size!==p.data.products.length)
   return invalid('Invalid invitation details or duplicate product roles.');

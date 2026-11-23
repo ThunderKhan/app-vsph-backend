@@ -11,7 +11,7 @@ const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const version=z.number().int().min(1).max(Number.MAX_SAFE_INTEGER);
 const cursor=z.strictObject({afterId:z.string().regex(uuid).optional()});
 const profile=z.strictObject({version,name:z.string().trim().min(1).max(150)})
- .refine(value=>!/[\u0000-\u001f\u007f]/.test(value.name));
+ .refine(value=>!Array.from(value.name).some(ch=>ch.charCodeAt(0)<32||ch.charCodeAt(0)===127));
 const member=z.strictObject({userId:z.string().regex(uuid),version,
  role:z.enum(['admin','member','viewer']),status:z.enum(['active','suspended']),
  confirmed:z.literal(true)});
@@ -34,7 +34,7 @@ function validateInvite(raw:unknown,organizationId:string):Record<string,unknown
  const parsed=invite.safeParse(raw);
  if(!parsed.success)return invalid('Provide name, email, organization role and explicit product roles.');
  const value=parsed.data,name=value.name.trim(),email=value.email.trim().toLowerCase();
- if(!name||name.length>150||/[\u0000-\u001f\u007f]/.test(name)||
+ if(!name||name.length>150||Array.from(name).some(ch=>ch.charCodeAt(0)<32||ch.charCodeAt(0)===127)||
    !email||email.length>190||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
   return invalid('Provide name, email, organization role and explicit product roles.');
  if(new Set(value.products.map(x=>x.applicationId.toLowerCase())).size!==value.products.length)

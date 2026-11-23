@@ -41,7 +41,7 @@ function parseFilters(raw:unknown):{kind:JournalKind;filters:Record<string,unkno
   if(q[key]!==undefined)filters[key]=q[key];
  if(q.search!==undefined){
   const search=q.search.trim();
-  if(search.length>100||/[\u0000-\u001f\u007f]/.test(search)||
+  if(search.length>100||Array.from(search).some(ch=>ch.charCodeAt(0)<32||ch.charCodeAt(0)===127)||
     /[\uD800-\uDFFF]/u.test(search))return invalid();
   filters.search=search;
  }
