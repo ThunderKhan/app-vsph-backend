@@ -23,6 +23,13 @@ function state() {
     appByCode:async code=>code==='CRM'?application:null,
     contexts:async()=>[{id:org,name:'Org A',status:'active',role:'manager'}],
     listedApps:async()=>[application],
+    sessionCommand:async(actor,action,target,currentHash)=>{
+      if(actor!==id||!sessions.has(currentHash)) throw Error('unauthorized');
+      if(action==='list')return {sessions:[{id:org,current_session:true}]};
+      if(action==='revoke_others')return {revoked:0};
+      if(action==='revoke' && target===org)return {revoked:0};
+      return {revoked:0};
+    },
     listRecords:async()=>[],
     createAppSession:async row=>{apps.set(row.token_hash,row);},
     appSession:async hash=>apps.get(hash)??null,

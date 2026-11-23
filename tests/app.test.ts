@@ -13,12 +13,18 @@ test('unconfigured health never claims readiness', async () => {
       releaseReady: false, scope: 'database-connectivity-only' });
   } finally { await app.close(); }
 });
-test('API rejects unimplemented operations and cross-origin writes', async () => {
+test('API rejects malformed credentials, missing provider, and cross-origin writes', async () => {
   const app = buildApp(env);
   try {
     const missing = await app.inject({ method: 'POST', url: '/api/auth/login',
       headers: { origin: 'http://localhost:3000' }, payload: { email: 'a@test.invalid' } });
-    assert.equal(missing.statusCode, 404);
+    assert.equal(missing.statusCode, 400);
+    assert.equal(missing.json().code, 'INVALID_CREDENTIAL_FIELDS');
+    const unavailable = await app.inject({ method: 'POST', url: '/api/auth/login',
+      headers: { origin: 'http://localhost:3000' },
+      payload: { email: 'a@test.invalid', password: 'test-only-not-real' } });
+    assert.equal(unavailable.statusCode, 503);
+    assert.equal(unavailable.headers['set-cookie'], undefined);
     const forbidden = await app.inject({ method: 'POST', url: '/api/auth/login',
       headers: { origin: 'https://evil.invalid' }, payload: {} });
     assert.equal(forbidden.statusCode, 403);

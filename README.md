@@ -6,6 +6,6 @@ The production behavior reference is `ThunderKhan/vsph-control-center@3b3a153587
 
 **Stack:** Node.js 24, TypeScript, Fastify 5, Supabase Auth, existing Supabase-hosted PostgreSQL and service-only SQL RPCs, Zod. Prisma 7 will be configured against an approved disposable database or verified schema snapshot; it must not replace privileged SQL/RPC or migrate live data.
 
-Start with Node 24 and `npm install` only in a development environment with approved network/dependency access. Run `npm run check`, then `npm run dev`. The documented `npm ci`/Docker build is **blocked until a reviewed package-lock.json exists**. Do not connect this partial implementation to production traffic.
+Use Node 24 and a disposable, approved development environment. A provisional lockfile was derived from the previously resolved migration scaffold; it requires a clean `npm ci` validation before being considered accepted. Run `npm ci && npm run check`, then `npm run dev`. No production database or provider is assumed. Do not connect this partial implementation to production traffic.
 
 See [migration progress](docs/migration/PROGRESS.md) for currently implemented endpoints, outstanding compatibility and security gates. The source Express application and its tests remain the functional authority until fully ported.

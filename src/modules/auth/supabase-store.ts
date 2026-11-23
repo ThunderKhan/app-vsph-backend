@@ -71,6 +71,13 @@ export function supabaseAuthStore(env: Env): AuthStore {
       }
       return contexts;
     },
+    async sessionCommand(actorId,action,id,currentHash) {
+      // Exact legacy service-role RPC: PostgreSQL validates current actor,
+      // active session, target ownership and revocation in one transaction.
+      return checked(await db().rpc('session_command',{
+        p_actor:actorId,p_action:action,p_id:id,p_data:{currentHash},
+      }));
+    },
     async listedApps() {
       return checked(await db().from('applications')
         .select('id,code,name,login_path,status,visibility').eq('status','active')

@@ -151,6 +151,20 @@ export function installAuthRoutes(app:FastifyInstance, env:Env,deps:AuthDependen
     reply.header('Set-Cookie',expireCookies({[name]:raw??''},secure).slice(-1));
     return {message:'Application signed out.'};
   });
+  app.get('/api/account/sessions',async(request)=>{
+    const principal=await requirePortal(request);
+    return store.sessionCommand(principal.user.id,'list',null,principal.session.token_hash);
+  });
+  app.post('/api/account/sessions/revoke-others',async(request)=>{
+    const principal=await requirePortal(request);
+    return store.sessionCommand(principal.user.id,'revoke_others',null,principal.session.token_hash);
+  });
+  app.post<{Params:{id:string}}>('/api/account/sessions/:id/revoke',async(request)=>{
+    const principal=await requirePortal(request);
+    if(!uuid.test(request.params.id))
+      throw new HttpError(400,'INVALID_SESSION_ID','Invalid session.');
+    return store.sessionCommand(principal.user.id,'revoke',request.params.id,principal.session.token_hash);
+  });
   app.get('/api/apps',async(request)=>{
     const principal=await requirePortal(request),apps=await store.listedApps();
     const authorized:Application[]=[];
